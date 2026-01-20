@@ -161,17 +161,61 @@ function render() {
   handDiv.innerHTML = '';
   groupsDiv.innerHTML = '';
 
+  // Render hand tiles (click to select)
   hand.forEach((t, i) => {
-    const b = document.createElement('button');
-    b.textContent = `${i}: ${t.toString()}`;
-    handDiv.appendChild(b);
+    const btn = document.createElement('button');
+    btn.textContent = t.toString();
+    btn.style.margin = '4px';
+    btn.style.color = tileColor(t.color);
+    btn.onclick = () => selectTileFromHand(i);
+    handDiv.appendChild(btn);
   });
 
+  // Render groups (click group to place selected tile)
   groups.forEach((g, gi) => {
     const div = document.createElement('div');
-    div.textContent = gi + ': ' + g.map(t => t.toString()).join(' ');
+    div.style.margin = '6px 0';
+    div.style.padding = '6px';
+    div.style.border = '1px solid black';
+
+    const title = document.createElement('strong');
+    title.textContent = 'Group ' + gi + ': ';
+    div.appendChild(title);
+
+    g.forEach(t => {
+      const span = document.createElement('span');
+      span.textContent = t.toString() + ' ';
+      span.style.color = tileColor(t.color);
+      div.appendChild(span);
+    });
+
+    div.onclick = () => placeTileInGroup(gi);
     groupsDiv.appendChild(div);
   });
+}
+
+// -------------------- Tile Movement --------------------
+let selectedHandIndex = null;
+
+function selectTileFromHand(index) {
+  selectedHandIndex = index;
+}
+
+function placeTileInGroup(groupIndex) {
+  if (selectedHandIndex === null) return;
+  const tile = hand.splice(selectedHandIndex, 1)[0];
+  groups[groupIndex].push(tile);
+  playedThisTurn.add(tile.id);
+  selectedHandIndex = null;
+  render();
+}
+
+function tileColor(color) {
+  if (color === 'red') return 'red';
+  if (color === 'blue') return 'blue';
+  if (color === 'yellow') return 'goldenrod';
+  if (color === 'black') return 'black';
+  return 'black';
 }
 
 // -------------------- Init --------------------
